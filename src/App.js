@@ -1,19 +1,55 @@
 import React, { useState } from "react";
 import "./App.css";
 
-function Todo({ todo, index, completeTodo, deleteTodo }) {
-  return (
-    <div
-      style={{ textDecoration: todo.isCompleted ? "line-through" : "" }}
-      className="todo"
-    >
-      {todo.text}
+function Todo({ todo, index, completeTodo, deleteTodo, updateTodo }) {
+  const [editMode, setMode] = useState(false);
+  const [value, setValue] = useState("");
+
+  const editTodo = () => {
+    setMode(true);
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if (!value) return;
+    updateTodo(value, index);
+    setMode(false);
+  };
+
+  if (editMode) {
+    return (
       <div>
-        <button onClick={() => completeTodo(index)}>Complete</button>
-        <button onClick={() => deleteTodo(index)}>Delete</button>
+        <form onSubmit={handleSubmit}>
+          <input
+            autoFocus
+            type="text"
+            className="input"
+            value={value}
+            placeholder="Edit To-Do"
+            onChange={e => setValue(e.target.value)}
+          />
+        </form>
+        <div>
+          <button onClick={() => completeTodo(index)}>Complete</button>
+          <button onClick={() => deleteTodo(index)}>Delete</button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <div
+        style={{ textDecoration: todo.isCompleted ? "line-through" : "" }}
+        className="todo"
+      >
+        {todo.text}
+        <div>
+          <button onClick={() => completeTodo(index)}>Complete</button>
+          <button onClick={() => deleteTodo(index)}>Delete</button>
+          <button onClick={() => editTodo(index)}>Edit</button>
+        </div>
+      </div>
+    );
+  }
 }
 
 function TodoForm({ addTodo }) {
@@ -72,16 +108,23 @@ function App() {
     setTodos(newTodos);
   };
 
+  const updateTodo = (text, index) => {
+    const newTodos = [...todos];
+    newTodos.splice(index, 1, { text });
+    setTodos(newTodos);
+  };
+
   return (
     <div className="app">
       <div className="todo-list">
         {todos.map((todo, index) => (
           <Todo
-            key={index}
+            // key={index}
             index={index}
             todo={todo}
             completeTodo={completeTodo}
             deleteTodo={deleteTodo}
+            updateTodo={updateTodo}
           />
         ))}
         <TodoForm addTodo={addTodo} />
